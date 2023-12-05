@@ -40,6 +40,7 @@ export default {
     SwiperSlide,
   },
   created() {
+    console.log('created component')
     // Check if the local storage database is created, if not, create one
     if (!localStorage.getItem('ishtehar_db')) {
       localStorage.setItem('ishtehar_db', JSON.stringify([]));
@@ -49,6 +50,7 @@ export default {
     this.primaryKey = parseInt(localStorage.getItem('lastPrimaryKey')) || 1;
     this.responseData = this.$store.state.responseData;
     this.type = this.responseData.business_id ? 'Branch' : 'Business';
+    console.log(`check the id ${this.type}`)
     this.id = this.responseData.id;
     console.log('created')
     this.getAd(this.id, this.type);
