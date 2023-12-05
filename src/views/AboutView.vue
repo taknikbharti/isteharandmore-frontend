@@ -52,7 +52,7 @@ export default {
     this.type = this.responseData.business_id ? 'Branch' : 'Business';
     console.log(`check the id ${this.type}`)
     this.id = this.responseData.id;
-    console.log('created')
+    // console.log('created')
     this.getAd(this.id, this.type);
   },
   data() {
@@ -73,9 +73,9 @@ export default {
         .then(({ data }) => {
           this.files = data.files || [];
           this.id = data.id || [];
-          if (this.files.length > 0) {
-            console.log(this.files);
-          }
+          // if (this.files.length > 0) {
+          //   console.log(this.files);
+          // }
         })
         .catch((error) => {
           alert(error.message);
@@ -99,17 +99,17 @@ export default {
     // },
     onSwiper(swiper) {
       this.swiper = swiper;
-      console.log('Swiper initialized');
+      // console.log('Swiper initialized');
       this.storeDb();
       // console.log(this.isImage(this.files[swiper.activeIndex]));
       this.swipeNow();
     },
     adSwipe(swiper) {
-      console.log(this.files)
-      console.log(this.id[swiper.activeIndex])
+      // console.log(this.files)
+      // console.log(this.id[swiper.activeIndex])
       this.storeDb();
       if (this.isVideo(this.files[swiper.activeIndex])) {
-        console.log(`video start ${swiper.activeIndex}`)
+        // console.log(`video start ${swiper.activeIndex}`)
         this.playVideo(swiper);
       }else if (this.isImage(this.files[swiper.activeIndex])) {       
           this.swipeNext();
@@ -126,7 +126,7 @@ export default {
       // this.swiper.slideTo(0)
     },
     swipeNext () {
-      console.log(`swipeNext() called`)
+      // console.log(`swipeNext() called`)
       setTimeout(() => {
         this.swiper.slideNext()
       }, this.interval);
@@ -139,21 +139,21 @@ export default {
     // },
     playVideo(swiper) {
       if (this.isVideo(this.files[swiper.activeIndex])) {
-       console.log(`playvideo() called`);
+      //  console.log(`playvideo() called`);
         let videoPlayer = this.$refs.videoPlayer;
 
     if (videoPlayer && videoPlayer[this.currentIndex].duration) {
-      console.log(`video start ${this.interval}`);
+      // console.log(`video start ${this.interval}`);
       videoPlayer[this.currentIndex].autoplay = true;
       videoPlayer[this.currentIndex].muted = false;
-      console.log('Video started');
+      // console.log('Video started');
       videoPlayer[this.currentIndex].play();
     }
   }
 },
 videoEnded() {
   let videoPlayer = this.$refs.videoPlayer;
-  console.log(`video end`);
+  // console.log(`video end`);
   videoPlayer[this.currentIndex].autoplay = false;
   videoPlayer[this.currentIndex].muted = true;
   // this.interval = 5000;
@@ -176,7 +176,7 @@ getRunningSeconds(index) {
 storeDb () {
    const logs = JSON.parse(localStorage.getItem('ishtehar_db')) || [];
 
-if (logs.length < 2) {
+if (logs.length < 1000) {
   const log = {
     primery_key: this.primaryKey++,
     ad_id: this.id[this.swiper.activeIndex],
@@ -190,7 +190,7 @@ if (logs.length < 2) {
   localStorage.setItem('lastPrimaryKey', this.primaryKey);
 } else {
   console.log("api called")
-  this.sendLogsToApi(logs);
+  // this.sendLogsToApi(logs);
   localStorage.setItem('ishtehar_db', JSON.stringify([]));
 }
 },
@@ -198,7 +198,8 @@ sendLogsToApi(logs) {
     axios
         .post('https://isteharandmore.com/api/ad_running_data', { logs }, { headers: { 'Content-Type': 'application/json' } })
         .then((response) => {
-            console.log('Logs sent to the API:', response.data.message, response.data.logs);
+            // console.log('Logs sent to the API:', response.data.message, response.data.logs);
+            console.log('Logs sent to the API:', response.data.message);
         })
         .catch((error) => {
             console.error('Error sending logs to the API:', error.message);

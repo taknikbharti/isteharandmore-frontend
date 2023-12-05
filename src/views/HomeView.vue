@@ -48,7 +48,7 @@
         })
           .then(({ data }) => {
             alert(data.message);
-            console.log(data)
+            // console.log(data)
             if (data.status === true) {
             this.$store.commit('setResponseData', data.data);
             this.$router.push({ name: 'about' });
