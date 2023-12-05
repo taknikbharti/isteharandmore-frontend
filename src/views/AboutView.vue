@@ -67,7 +67,7 @@ export default {
   methods: {
     getAd(id, type) {
       axios
-        .post('http://isteharandmore.com/api/ads', { id, type })
+        .post('http://localhost:8000/api/ads', { id, type })
         .then(({ data }) => {
           this.files = data.files || [];
           this.id = data.id || [];
@@ -193,9 +193,8 @@ if (logs.length < 2) {
 }
 },
 sendLogsToApi(logs) {
-    console.log(logs);
     axios
-        .post('http://isteharandmore.com/api/ad_running_data', { logs })
+        .post('http://localhost:8000/api/ad_running_data', { logs }, { headers: { 'Content-Type': 'application/json' } })
         .then((response) => {
             console.log('Logs sent to the API:', response.data.message, response.data.logs);
         })
@@ -203,6 +202,7 @@ sendLogsToApi(logs) {
             console.error('Error sending logs to the API:', error.message);
         });
 },
+
   },
 };
 </script>

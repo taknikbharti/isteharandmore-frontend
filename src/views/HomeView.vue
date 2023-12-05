@@ -40,7 +40,8 @@
 
     methods: {
       check() {
-        axios.post('http://isteharandmore.com/api/business/login', {
+        // axios.post('http://localhost:8000/api/business/login', {
+        axios.post('https://isteharandmore.com/api/business/login', {
           username: this.username,
           password: this.password,
           screen: this.screen
