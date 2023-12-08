@@ -40,16 +40,16 @@
 
     methods: {
       check() {
-        // axios.post('http://localhost:8000/api/business/login', {
-        axios.post('https://isteharandmore.com/api/business/login', {
+        axios
+        .post('http://localhost:8000/api/business/login', {
           username: this.username,
           password: this.password,
           screen: this.screen
         })
           .then(({ data }) => {
             alert(data.message);
-            // console.log(data)
-            if (data.status === true) {
+            console.log(data.data.token);
+            if (data.status === 200) {
             this.$store.commit('setResponseData', data.data);
             this.$router.push({ name: 'about' });
           }

@@ -7,32 +7,29 @@
       @slideChange="adSwipe"
       :style="{ height: '100vh' }"
     >
-      <swiper-slide v-for="(file, index) in files" :key="index">
-        <template v-if="isImage(file)">
-          <img :src="getUrl(file)" class="swiper-image" alt="Image" />
+    <swiper-slide v-for="(file, index) in files" :key="index">
+        <template v-if="file.type === 'image'">
+          <img :src="file.path" class="swiper-image" alt="Image" />
         </template>
-        <template v-else-if="isVideo(file)">
+        <template v-else-if="file.type === 'video'">
           <video
             @ended="videoEnded"
             ref="videoPlayer"
             controls
             class="swiper-video"
-            @loadedmetadata="playVideo"
+            @loadedmetadata="playVideo(index)"
           >
-            <source :src="getUrl(file)" type="video/mp4" />
+            <source :src="file.path" type="video/mp4" />
           </video>
         </template>
       </swiper-slide>
     </swiper>
   </div>
 </template>
-
 <script>
 import axios from 'axios';
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import 'swiper/css'; // Import Swiper styles
-// import 'swiper/css/autoplay';
-// import 'swiper/css/scrollbar';
+import 'swiper/css';
 
 export default {
   components: {
@@ -45,133 +42,107 @@ export default {
     if (!localStorage.getItem('ishtehar_db')) {
       localStorage.setItem('ishtehar_db', JSON.stringify([]));
     }
-
-    // Retrieve the last used primary key from localStorage or default to 1
     this.primaryKey = parseInt(localStorage.getItem('lastPrimaryKey')) || 1;
     this.responseData = this.$store.state.responseData;
-    this.type = this.responseData.business_id ? 'Branch' : 'Business';
-    console.log(`check the id ${this.type}`)
-    this.id = this.responseData.id;
-    // console.log('created')
-    this.getAd(this.id, this.type);
+    console.log('created')
+    console.log(this.responseData);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${this.responseData.token}`
+    this.getAd();
   },
   data() {
     return {
       responseData: null,
       files: [],
-      id: [],
       currentIndex: 0,
       swiper: null,
       interval: 5000,
       primaryKey: 1,
     };
   },
+
   methods: {
-    getAd(id, type) {
+    getAd() {
       axios
-        .post('https://isteharandmore.com/api/ads', { id, type })
+        .get('http://localhost:8000/api/ads',)
         .then(({ data }) => {
+          console.log(`response data ${data.files}`);
           this.files = data.files || [];
-          this.id = data.id || [];
-          // if (this.files.length > 0) {
-          //   console.log(this.files);
-          // }
         })
         .catch((error) => {
           alert(error.message);
         });
     },
-    isImage(file) {
-      return /\.(jpg|jpeg|png|gif)$/i.test(file);
-    },
-    isVideo(file) {
-      return /\.(mp4)$/i.test(file);
-    },
-    getUrl(file) {
-      return `https://istehar-bucket.s3.ap-south-1.amazonaws.com/${file}`;
-    },
+
     next() {
       this.swiper.slideNext();
     },
-    // prev() {
-    //   this.swiper.slidePrev();
-    //   this.currentIndex -= 1;
-    // },
+
+  //auto call when swiper load 
     onSwiper(swiper) {
       this.swiper = swiper;
-      // console.log('Swiper initialized');
-      this.storeDb();
-      // console.log(this.isImage(this.files[swiper.activeIndex]));
+      console.log('Swiper initialized');
+      // this.storeDb();
+      console.log(this.files[0]);
       this.swipeNow();
     },
+
     adSwipe(swiper) {
-      // console.log(this.files)
-      // console.log(this.id[swiper.activeIndex])
+      console.log(`next method adswiper`);
+      console.log(this.files[(swiper.activeIndex - 1)].path)
       this.storeDb();
-      if (this.isVideo(this.files[swiper.activeIndex])) {
-        // console.log(`video start ${swiper.activeIndex}`)
+      if (this.files[swiper.activeIndex].type == 'video') {
         this.playVideo(swiper);
-      }else if (this.isImage(this.files[swiper.activeIndex])) {       
+      }else if (this.files[swiper.activeIndex].type == 'image') {       
           this.swipeNext();
       }  
     },
+
     swipeNow () {
       if(this.files[this.swiper.activeIndex]){
         this.swiper.slideNext()
       }else {
-        setTimeout(() => {
-          this.swiper.slideNext()
-      }, this.interval);
+        // console.log(`here swipeNow is called with else `)
+        //   console.log(`if first item is image`);
+            setTimeout(() => {
+            this.swiper.slideNext()
+          }, this.interval);
       }
-      // this.swiper.slideTo(0)
     },
+
     swipeNext () {
-      // console.log(`swipeNext() called`)
       setTimeout(() => {
         this.swiper.slideNext()
       }, this.interval);
-      // this.adSwipe(swiper)
     },
-    // swipeNext () {
-    //   this.currentInterval = setInterval(() => {
-    //     this.swiper.slideNext();
-    //   }, this.interval)
-    // },
-    playVideo(swiper) {
-      if (this.isVideo(this.files[swiper.activeIndex])) {
-      //  console.log(`playvideo() called`);
-        let videoPlayer = this.$refs.videoPlayer;
 
-    if (videoPlayer && videoPlayer[this.currentIndex].duration) {
-      // console.log(`video start ${this.interval}`);
-      videoPlayer[this.currentIndex].autoplay = true;
-      videoPlayer[this.currentIndex].muted = false;
-      // console.log('Video started');
-      videoPlayer[this.currentIndex].play();
+    playVideo(swiper) {
+      if (this.files[swiper.activeIndex].type == 'video') {
+        let videoPlayer = this.$refs.videoPlayer;
+      if (videoPlayer && videoPlayer[this.currentIndex].duration) {
+        videoPlayer[this.currentIndex].autoplay = true;
+        videoPlayer[this.currentIndex].muted = false;
+        videoPlayer[this.currentIndex].play();
+      }
     }
-  }
 },
+// auto call when video completed
 videoEnded() {
   let videoPlayer = this.$refs.videoPlayer;
-  // console.log(`video end`);
   videoPlayer[this.currentIndex].autoplay = false;
   videoPlayer[this.currentIndex].muted = true;
-  // this.interval = 5000;
   this.currentIndex += 1;
   this.swipeNow();
-  // // clearInterval(this.currentInterval);
-  // this.currentInterval = setInterval(() => {
-    // this.swiper.slideNext();
-  // }, this.interval);
-
-  // console.log(`current index incremented ${++this.currentIndex}`);
 },
+//getting the time of running ad
 getRunningSeconds(index) {
-      if (this.isVideo(this.files[index])) {
+        console.log(`get running sec. ${this.files[(this.swiper.activeIndex - 1)].type}`);
+// if video then wait at the time of video duration
+      if (this.files[index].type == 'video') {
         let videoPlayer = this.$refs.videoPlayer;
-        return videoPlayer ? videoPlayer[this.currentIndex].duration : 0;
+        return videoPlayer ? videoPlayer[(this.currentIndex - 1)].duration : 0;
       }
-      return 5; // Default for images
+// Default for images  
+      return 5;
     },
 storeDb () {
    const logs = JSON.parse(localStorage.getItem('ishtehar_db')) || [];
@@ -179,8 +150,8 @@ storeDb () {
 if (logs.length < 1000) {
   const log = {
     primery_key: this.primaryKey++,
-    ad_id: this.id[this.swiper.activeIndex],
-    running_seconds: this.getRunningSeconds(this.swiper.activeIndex),
+    ad_id: this.files[(this.swiper.activeIndex - 1)].id,
+    running_seconds: this.getRunningSeconds((this.swiper.activeIndex - 1)),
     timestamp: new Date().toISOString(),
   };
   logs.push(log);
@@ -190,16 +161,15 @@ if (logs.length < 1000) {
   localStorage.setItem('lastPrimaryKey', this.primaryKey);
 } else {
   console.log("api called")
-  // this.sendLogsToApi(logs);
+  this.sendLogsToApi(logs);
   localStorage.setItem('ishtehar_db', JSON.stringify([]));
 }
 },
 sendLogsToApi(logs) {
     axios
-        .post('https://isteharandmore.com/api/ad_running_data', { logs }, { headers: { 'Content-Type': 'application/json' } })
+        .post('http://localhost:8000/api/ad_running_data', { logs }, { headers: { 'Content-Type': 'application/json' } })
         .then((response) => {
-            // console.log('Logs sent to the API:', response.data.message, response.data.logs);
-            console.log('Logs sent to the API:', response.data.message);
+            console.log('Logs sent to the API:', response.data.message, response.data.logs);
         })
         .catch((error) => {
             console.error('Error sending logs to the API:', error.message);
