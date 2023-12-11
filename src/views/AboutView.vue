@@ -63,7 +63,7 @@ export default {
   methods: {
     getAd() {
       axios
-        .get('http://localhost:8000/api/ads',)
+        .get('https://isteharandmore.com/api/ads',)
         .then(({ data }) => {
           console.log(`response data ${data.files}`);
           this.files = data.files || [];
@@ -167,7 +167,7 @@ if (logs.length < 1000) {
 },
 sendLogsToApi(logs) {
     axios
-        .post('http://localhost:8000/api/ad_running_data', { logs }, { headers: { 'Content-Type': 'application/json' } })
+        .post('https://isteharandmore.com/api/ad_running_data', { logs }, { headers: { 'Content-Type': 'application/json' } })
         .then((response) => {
             console.log('Logs sent to the API:', response.data.message, response.data.logs);
         })

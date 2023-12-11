@@ -7,8 +7,8 @@
           </div>
           <div class="card-body">
             <div class="form-group">
-              <label for="getUsername">User Name</label>
-              <input v-model="username" type="text" id="getUsername" placeholder="User Name" />
+              <label for="getNumber">Number</label>
+              <input v-model="number" type="text" id="getNumber" placeholder="Number" />
             </div>
             <div class="form-group mt-3">
               <label for="getPassword">Password</label>
@@ -32,7 +32,7 @@
   export default {
     data() {
       return {
-        username: '',
+        number: '',
         password: '',
         screen: ''
       };
@@ -41,8 +41,8 @@
     methods: {
       check() {
         axios
-        .post('http://localhost:8000/api/business/login', {
-          username: this.username,
+        .post('https://isteharandmore.com/api/business/login', {
+          number: this.number,
           password: this.password,
           screen: this.screen
         })
