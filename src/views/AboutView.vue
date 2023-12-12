@@ -1,10 +1,10 @@
 <template>
-  <!-- <button @click="next">Slide to the next slide</button> -->
   <div class="about">
     <swiper
       :slides-per-view="1"
       @swiper="onSwiper"
       @slideChange="adSwipe"
+      @reachEnd="endSwiper"
       :style="{ height: '100vh' }"
     >
     <swiper-slide v-for="(file, index) in files" :key="index">
@@ -15,7 +15,6 @@
           <video
             @ended="videoEnded"
             ref="videoPlayer"
-            controls
             class="swiper-video"
             @loadedmetadata="playVideo(index)"
           >
@@ -88,6 +87,8 @@ export default {
 
     adSwipe(swiper) {
       console.log(`next method adswiper`);
+      if(swiper.activeIndex == 0)
+        this.swipeNow();
       console.log(this.files[(swiper.activeIndex - 1)].path)
       this.storeDb();
       if (this.files[swiper.activeIndex].type == 'video') {
@@ -98,11 +99,10 @@ export default {
     },
 
     swipeNow () {
-      if(this.files[this.swiper.activeIndex]){
+      if(this.files[this.swiper.activeIndex] && (!this.swiper.activeIndex == 0)){
         this.swiper.slideNext()
-      }else {
-        // console.log(`here swipeNow is called with else `)
-        //   console.log(`if first item is image`);
+      }
+      else {
             setTimeout(() => {
             this.swiper.slideNext()
           }, this.interval);
@@ -110,6 +110,7 @@ export default {
     },
 
     swipeNext () {
+      console.log('swiper next ');
       setTimeout(() => {
         this.swiper.slideNext()
       }, this.interval);
@@ -120,7 +121,7 @@ export default {
         let videoPlayer = this.$refs.videoPlayer;
       if (videoPlayer && videoPlayer[this.currentIndex].duration) {
         videoPlayer[this.currentIndex].autoplay = true;
-        videoPlayer[this.currentIndex].muted = false;
+        // videoPlayer[this.currentIndex].muted = false;
         videoPlayer[this.currentIndex].play();
       }
     }
@@ -129,7 +130,7 @@ export default {
 videoEnded() {
   let videoPlayer = this.$refs.videoPlayer;
   videoPlayer[this.currentIndex].autoplay = false;
-  videoPlayer[this.currentIndex].muted = true;
+  // videoPlayer[this.currentIndex].muted = true;
   this.currentIndex += 1;
   this.swipeNow();
 },
@@ -164,6 +165,30 @@ if (logs.length < 1000) {
   this.sendLogsToApi(logs);
   localStorage.setItem('ishtehar_db', JSON.stringify([]));
 }
+},
+endSwiper(){
+  console.log(`endswiper ${this.files[(this.swiper.activeIndex + 1)].type == 'image'}`);
+if(this.files[(this.swiper.activeIndex + 1)].type == 'image') {
+  console.log('image');
+  this.moveToStart();
+}else{
+  this.playVideo(this.swiper);
+  this.currentIndex = 0;
+  this.swiper.slideTo(0);
+}  
+},
+moveToStart () {
+  this.currentIndex = 0;
+  setTimeout(() => {
+    this.restart();
+    console.log(`move console`);
+      }, this.interval);
+},
+restart () {
+  console.log(`called with retart ${this.files[0].type == 'image'}`)
+  this.swiper.slideTo(0);
+  // console.log(`active index = ${this.swiper.activeIndex}`);
+  // this.adSwipe(this.swiper);
 },
 sendLogsToApi(logs) {
     axios
